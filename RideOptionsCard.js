@@ -1,15 +1,17 @@
-import { View,Image, FlatList,Text,SafeAreaView, TouchableOpacity } from 'react-native'
+import { View,Image, FlatList,Text,SafeAreaView, TouchableOpacity,ActivityIndicator } from 'react-native'
 import React, { useState,useEffect } from 'react'
 import {Icon} from "react-native-elements"
 import { useNavigation } from '@react-navigation/native'
 import car1R from "../assets/car1R.png"
 import tw from 'tailwind-react-native-classnames'
 import { useDispatch, useSelector } from 'react-redux';
-
+import { setTravelTimeInformation } from '../navSlice/navSlice'
 import { original } from '@reduxjs/toolkit'
 export default function RideOptionsCard() {
-  const {origin,destination,description,setTravelTimeInformation,DestinationDescription}=useSelector(state=>state.nav)
+  const [dataa, setDataa] = useState(null);
 
+  const {origin,destination,description,travelTimeInformation,DestinationDescription}=useSelector(state=>state.nav)
+const SURGE_CHARGE_RATE=1.5
 const navigation=useNavigation()
 const dispatch=useDispatch()
 const origin1 = {latitude: origin.geometry.location.lat, longitude:origin.geometry.location.lng};
@@ -24,11 +26,15 @@ useEffect(()=>{
     .then((res)=>res.json())
     .then((data) => {
       console.log(data)
+      dispatch(setTravelTimeInformation(data.rows[0].elements[0]))
+      setDataa(true)
     })
     .catch((error) => console.error('Error fetching distance matrix:', error))
+    
   }
+  
   getTravelTime()
-},[origin1,destination1,key])
+},[origin1,destination1,key,travelTimeInformation])
 
 const data=[
     {
@@ -51,11 +57,11 @@ const data=[
   },
   
 ]
-    return (
-    <>
+function DataView(){
+return(<>
     <SafeAreaView>
         
-        <Text style={tw`text-center py-5 text-xl`}>Pick a Ride</Text>
+        <Text style={tw`text-center py-5 text-xl`}>Pick a Ride...{travelTimeInformation.distance.text} </Text>
         </SafeAreaView>
         <TouchableOpacity onPress={()=>navigation.goBack()} style={tw`absolute top-3 left-5 p-3 rounded-full bg-white`}>
         <Icon name="chevron-left" type="fontawesome" color="black" size={20}/>
@@ -68,9 +74,18 @@ const data=[
      <Image style={{width:100,height:100,resizeMode:"contain"}} source={item.image}/>
       <View >
         <Text >{item.title}</Text>
-        <Text style={tw`text-xl font-semibold`}>Travel Time... </Text>
+         
+         <Text style={tw`text-xl font-semibold`}>{travelTimeInformation.duration.text}Travel Time... </Text>
       </View >
-      <Text style={tw`text-xl`}>$99</Text>
+      <Text style={tw`text-xl`}>{
+        new Intl.NumberFormat('en',{
+          style:"currency",
+          currency:"PKR",
+
+        }).format(
+          (travelTimeInformation.duration.value*SURGE_CHARGE_RATE*item.multiplier)/100
+        )
+      }</Text>
     </TouchableOpacity>
    
     </SafeAreaView>
@@ -85,6 +100,14 @@ const data=[
  
 
 </SafeAreaView>
+
+</>)
+}
+
+    return (
+    <>
+ {dataa?<DataView/>:<ActivityIndicator size={50} color="red"/>}   
+
 
     </>
   )

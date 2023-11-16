@@ -8,8 +8,11 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { useDispatch } from 'react-redux'
 import { setDestinationDescription,setDestination,setOrigin,setDescription } from '../navSlice/navSlice'
 import NavFavorite from './NavFavorite'
+import { useNavigation } from '@react-navigation/native'
 export default function HomeScreen() {
-const dispatch=useDispatch();
+
+const navigation=useNavigation()
+    const dispatch=useDispatch();
     return (
     <SafeAreaView style={tw`bg-white h-full w-full`}>
       <View style={tw`p-5`}>

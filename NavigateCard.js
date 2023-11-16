@@ -1,17 +1,31 @@
 import { View, Text,SafeAreaView,TouchableOpacity } from 'react-native'
 import React from 'react'
 import tw from 'tailwind-react-native-classnames'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux';
 import { setDestination,setOrigin,setDescription } from '../navSlice/navSlice'
 import { useNavigation } from '@react-navigation/native'
 import { Icon } from 'react-native-elements'
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 import NavFavorite from './NavFavorite'
+import { setTravelTimeInformation } from '../navSlice/navSlice'
 
 export default function NavigateCard() {
-const navigation=useNavigation()
+
+  const {DestinationDescription,description,}=useSelector(state=>state.nav)
+
+  const navigation=useNavigation()
 const dispatch=useDispatch()
-  return (
+const getTravelTime=async()=>{
+    fetch(`https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${description.description}&destinations=${DestinationDescription.description}&key=${key}`)
+  .then((res)=>res.json())
+  .then((data) => {
+    console.warn("warn")
+    dispatch(setTravelTimeInformation(data.rows[0].elements[0]))
+  })
+  .catch((error) => console.error('Error fetching distance matrix:', error))
+}
+
+return (
     <SafeAreaView style={tw`bg-white flex-1`}>
 
       <Text style={tw`text-center py-5 text-xl text-black font-bold`}>Hello Good Morning</Text>
@@ -43,7 +57,8 @@ const dispatch=useDispatch()
       </View>
       <NavFavorite/>
       <SafeAreaView style={tw`flex flex-row justify-between`}>
-    <TouchableOpacity onPress={()=>navigation.navigate("RideOptionsCard")} style={tw` flex mt-10 ml-5 flex-row bg-black w-24 px-4 py-3 rounded-full bg-black`}>
+    <TouchableOpacity onPress={()=>navigation.navigate("RideOptionsCard")
+} style={tw` flex mt-10 ml-5 flex-row bg-black w-24 px-4 py-3 rounded-full bg-black`}>
    
     <Icon 
            
